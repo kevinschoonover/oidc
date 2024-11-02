@@ -298,6 +298,7 @@ type Provider struct {
 	timer                   <-chan time.Time
 	accessTokenVerifierOpts []AccessTokenVerifierOpt
 	idTokenHintVerifierOpts []IDTokenHintVerifierOpt
+	jwtProfileVerifierOpts  []JWTProfileVerifierOption
 	corsOpts                *cors.Options
 	logger                  *slog.Logger
 }
@@ -438,7 +439,7 @@ func (o *Provider) IDTokenHintVerifier(ctx context.Context) *IDTokenHintVerifier
 }
 
 func (o *Provider) JWTProfileVerifier(ctx context.Context) *JWTProfileVerifier {
-	return NewJWTProfileVerifier(o.Storage(), IssuerFromContext(ctx), 1*time.Hour, time.Second)
+	return NewJWTProfileVerifier(o.Storage(), IssuerFromContext(ctx), 1*time.Hour, time.Second, o.jwtProfileVerifierOpts...)
 }
 
 func (o *Provider) AccessTokenVerifier(ctx context.Context) *AccessTokenVerifier {
@@ -637,6 +638,13 @@ func WithIDTokenHintKeySet(keySet oidc.KeySet) Option {
 func WithIDTokenHintVerifierOpts(opts ...IDTokenHintVerifierOpt) Option {
 	return func(o *Provider) error {
 		o.idTokenHintVerifierOpts = opts
+		return nil
+	}
+}
+
+func WithJWTProfileVerifierOptions(opts ...JWTProfileVerifierOption) Option {
+	return func(o *Provider) error {
+		o.jwtProfileVerifierOpts = opts
 		return nil
 	}
 }
